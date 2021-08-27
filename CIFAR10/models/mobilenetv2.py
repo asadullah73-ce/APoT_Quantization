@@ -53,10 +53,10 @@ class InvertedResidual(nn.Module):
             conv5 = nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False)
 
         else:
-            conv1 = Quantconv3x3(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv1 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
             conv2 = Quantconv3x3(hidden_dim, oup, 1, 1, 0, bias=False)
             conv3 = Quantconv3x3(inp, hidden_dim, 1, 1, 0, bias=False)
-            conv4 = Quantconv3x3(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv4 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
             conv5 = Quantconv3x3(hidden_dim, oup, 1, 1, 0, bias=False)
 
         if expand_ratio == 1:
