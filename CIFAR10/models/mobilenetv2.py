@@ -112,6 +112,12 @@ class MobileNetV2(nn.Module):
         x = self.classifier(x)
         return x
 
+    def show_params(self):
+        for m in self.modules():
+            if isinstance(m, QuantConv2d):
+                m.show_params()
+
+
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
