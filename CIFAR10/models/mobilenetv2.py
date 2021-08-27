@@ -6,14 +6,22 @@ from models.quant_layer import *
 
 def conv_bn(inp, oup, stride):
     return nn.Sequential(
+        nn.Conv2d(inp, oup, 3, stride, 1, bias=False),
+        nn.BatchNorm2d(oup),
+        nn.ReLU6(inplace=True)
+    )
+
+def Quantconv_bn(inp, oup, stride):
+    return nn.Sequential(
         QuantConv2d(inp, oup, 3, stride, 1, bias=False),
         nn.BatchNorm2d(oup),
         nn.ReLU6(inplace=True)
     )
 
+
 def conv_1x1_bn(inp, oup):
     return nn.Sequential(
-        QuantConv2d(inp, oup, 1, 1, 0, bias=False),
+        nn.Conv2d(inp, oup, 1, 1, 0, bias=False),
         nn.BatchNorm2d(oup),
         nn.ReLU6(inplace=True)
     )
@@ -25,7 +33,7 @@ def make_divisible(x, divisible_by=8):
 
 
 class InvertedResidual(nn.Module):
-    def __init__(self, inp, oup, stride, expand_ratio):
+    def __init__(self, inp, oup, stride, expand_ratio, float=False):
         super(InvertedResidual, self).__init__()
         self.stride = stride
         assert stride in [1, 2]
@@ -33,28 +41,42 @@ class InvertedResidual(nn.Module):
         hidden_dim = int(inp * expand_ratio)
         self.use_res_connect = self.stride == 1 and inp == oup
 
+        if float:
+            conv1 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv2 = nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False)
+            conv3 = nn.Conv2d(inp, hidden_dim, 1, 1, 0, bias=False)
+            conv4 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv5 = nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False)
+
+        else:
+            conv1 = Quantconv3x3(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv2 = Quantconv3x3(hidden_dim, oup, 1, 1, 0, bias=False)
+            conv3 = Quantconv3x3(inp, hidden_dim, 1, 1, 0, bias=False)
+            conv4 = Quantconv3x3(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv5 = Quantconv3x3(hidden_dim, oup, 1, 1, 0, bias=False)
+
         if expand_ratio == 1:
             self.conv = nn.Sequential(
                 # dw
-                QuantConv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                conv1,
                 nn.BatchNorm2d(hidden_dim),
                 nn.ReLU6(inplace=True),
                 # pw-linear
-                QuantConv2d(hidden_dim, oup, 1, 1, 0, bias=False),
+                conv2,
                 nn.BatchNorm2d(oup),
             )
         else:
             self.conv = nn.Sequential(
                 # pw
-                QuantConv2d(inp, hidden_dim, 1, 1, 0, bias=False),
+                conv3,
                 nn.BatchNorm2d(hidden_dim),
                 nn.ReLU6(inplace=True),
                 # dw
-                QuantConv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False),
+                conv4,
                 nn.BatchNorm2d(hidden_dim),
                 nn.ReLU6(inplace=True),
                 # pw-linear
-                QuantConv2d(hidden_dim, oup, 1, 1, 0, bias=False),
+                conv5,
                 nn.BatchNorm2d(oup),
             )
 
@@ -112,12 +134,6 @@ class MobileNetV2(nn.Module):
         x = self.classifier(x)
         return x
 
-    def show_params(self):
-        for m in self.modules():
-            if isinstance(m, QuantConv2d):
-                m.show_params()
-
-
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -133,8 +149,14 @@ class MobileNetV2(nn.Module):
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.zero_()
 
+    def show_params(self):
+        for m in self.modules():
+            if isinstance(m, QuantConv2d):
+                m.show_params()
 
-def mobilenet_v2(pretrained=False):
+
+
+def mobilenet_v2(float=False, pretrained=False):
     model = MobileNetV2(width_mult=1)
 
     if pretrained:
@@ -150,8 +172,4 @@ def mobilenet_v2(pretrained=False):
 
 if __name__ == '__main__':
     net = mobilenet_v2(True)
-
-
-
-
 
