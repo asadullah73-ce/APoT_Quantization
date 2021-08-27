@@ -11,6 +11,10 @@ def conv_bn(inp, oup, stride):
         nn.ReLU6(inplace=True)
     )
 
+def Quantconv3x3(in_planes, out_planes, stride=1):
+    " 3x3 quantized convolution with padding "
+    return QuantConv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
+
 def Quantconv_bn(inp, oup, stride):
     return nn.Sequential(
         QuantConv2d(inp, oup, 3, stride, 1, bias=False),
