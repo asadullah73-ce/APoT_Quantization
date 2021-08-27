@@ -49,7 +49,7 @@ def main():
         elif args.arch == 'res56':
             model = resnet56_cifar(float=float)
         elif args.arch == 'mobile':
-            model = mobilenet_v2()
+            model = mobilenet_v2(float=float)
         else:
             print('Architecture not support!')
             return

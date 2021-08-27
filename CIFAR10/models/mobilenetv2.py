@@ -171,5 +171,6 @@ def mobilenet_v2(float=False, pretrained=False):
 
 
 if __name__ == '__main__':
-    net = mobilenet_v2(True)
+    pass
+    #net = mobilenet_v2(True)
 
