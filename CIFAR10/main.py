@@ -48,6 +48,8 @@ def main():
             model = resnet20_cifar(float=float)
         elif args.arch == 'res56':
             model = resnet56_cifar(float=float)
+        elif args.arch == 'mobile':
+            model = mobilenet_v2()
         else:
             print('Architecture not support!')
             return
