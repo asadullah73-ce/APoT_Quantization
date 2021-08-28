@@ -11,7 +11,7 @@ def conv_bn(inp, oup, stride):
         nn.ReLU6(inplace=True)
     )
 
-def Quantconv3x3(in_planes, out_planes, stride=1):
+def Quantconv3x3(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False):
     " 3x3 quantized convolution with padding "
     return QuantConv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
@@ -53,10 +53,10 @@ class InvertedResidual(nn.Module):
             conv5 = nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False)
 
         else:
-            conv1 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv1 = Quantconv3x3(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
             conv2 = Quantconv3x3(hidden_dim, oup, 1, 1, 0)
             conv3 = Quantconv3x3(inp, hidden_dim, 1, 1, 0)
-            conv4 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv4 = Quantconv3x3(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
             conv5 = Quantconv3x3(hidden_dim, oup, 1, 1, 0)
 
         if expand_ratio == 1:
