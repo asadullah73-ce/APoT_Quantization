@@ -11,9 +11,9 @@ def conv_bn(inp, oup, stride):
         nn.ReLU6(inplace=True)
     )
 
-def Quantconv(in_planes, out_planes, kernel_size=3, stride=1, padding=1, bias=False):
+def Quantconv(in_planes, out_planes, kernel_size=3, stride=1, padding=1, groups=1, bias=False):
     " 3x3 quantized convolution with padding "
-    return QuantConv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
+    return QuantConv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, groups=groups, bias=False)
 
 def Quantconv_bn(inp, oup, stride):
     return nn.Sequential(
