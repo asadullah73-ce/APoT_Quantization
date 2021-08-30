@@ -46,7 +46,9 @@ class InvertedResidual(nn.Module):
         self.use_res_connect = self.stride == 1 and inp == oup
 
         if float:
-            conv1 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            #conv1 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
+            conv1 = first_conv(hidden_dim, hidden_dim, kernel_size=3, stride=1, padding=1, groups=hidden_dim, bias=False)
+
             conv2 = nn.Conv2d(hidden_dim, oup, 1, 1, 0, bias=False)
             conv3 = nn.Conv2d(inp, hidden_dim, 1, 1, 0, bias=False)
             conv4 = nn.Conv2d(hidden_dim, hidden_dim, 3, stride, 1, groups=hidden_dim, bias=False)
